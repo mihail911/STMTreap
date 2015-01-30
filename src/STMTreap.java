@@ -29,8 +29,8 @@ public class STMTreap implements IntSet {
     @org.deuce.Atomic
 	public boolean contains(final int key) {
         Node node = root;
-        int tempKey = node.key;
         while (node != null) {
+            int tempKey = node.key;
             if (key == tempKey) {
                 return true;
             }
@@ -47,11 +47,15 @@ public class STMTreap implements IntSet {
 
 
     private Node addImpl(final Node node, final int key) {
-        int tempKey = node.key;
+        int tempKey;
         if (node == null) {
             return new Node(key, randPriority());
         }
-        else if (key == tempKey) {
+
+        else{
+            tempKey = node.key;
+        }
+        if(key == tempKey) {
             // no insert needed
             return node;
         }
@@ -110,12 +114,14 @@ public class STMTreap implements IntSet {
     }
 
     private Node removeImpl(final Node node, final int key) {
-        int tempKey = node.key;
+        int tempKey;
         if (node == null) {
             // not present, nothing to do
             return null;
+        }else{
+            tempKey = node.key;
         }
-        else if (key == tempKey) {
+        if (key == tempKey) {
             if (node.left == null) {
                 // splice out this node
                 return node.right;

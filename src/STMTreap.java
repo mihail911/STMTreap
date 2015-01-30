@@ -1,3 +1,6 @@
+import org.deuce.Atomic;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class STMTreap implements IntSet {
     static class Node {
         final int key;
@@ -22,7 +25,8 @@ public class STMTreap implements IntSet {
     private Node root;
 
     @Override
-	public synchronized boolean contains(final int key) {
+    @org.deuce.Atomic
+	public boolean contains(final int key) {
         Node node = root;
         while (node != null) {
             if (key == node.key) {
@@ -32,9 +36,10 @@ public class STMTreap implements IntSet {
         }
         return false;
     }
-
+    //Possible change: Don't change node.left if you don't have to
     @Override
-	public synchronized void add(final int key) {
+    @org.deuce.Atomic
+	public void add(final int key) {
         root = addImpl(root, key);
     }
 
@@ -89,7 +94,8 @@ public class STMTreap implements IntSet {
     }
 
     @Override
-	public synchronized void remove(final int key) {
+    @org.deuce.Atomic
+	public void remove(final int key) {
         root = removeImpl(root, key);
     }
 

@@ -22,7 +22,8 @@ public class STMTreap implements IntSet {
         }
     }
 
-    private long randState = 0;
+    private long randState = 5;
+//    private long AtomicLong randState = new AtomicLong();
     private Node root;
 
     @Override
@@ -42,7 +43,8 @@ public class STMTreap implements IntSet {
     @Override
     @org.deuce.Atomic
 	public void add(final int key) {
-        root = addImpl(root, key);
+        Node temp = addImpl(root, key);
+        if (temp != root) root = temp;
     }
 
 
@@ -61,22 +63,26 @@ public class STMTreap implements IntSet {
         }
         else if (key < tempKey) {
             Node tempLeft = addImpl(node.left, key);
-            if (tempLeft != node.left){
+            if (tempLeft != node.left) {
                 node.left = tempLeft;
-            }else{
-                System.out.println("Same Left");
             }
+            //}else{
+                //System.out.println("Same Left");
+            //}
 //            node.left = addImpl(node.left, key);
             if (node.left.priority > node.priority) {
                 return rotateRight(node);
-            }else{
-                System.out.print("Same Right");
             }
             return node;
         }
         else {
             Node tempRight = addImpl(node.right, key);
-            if (tempRight != node.right) node.right = tempRight;
+            if (tempRight != node.right) {
+                node.right = tempRight;
+            }
+            //}else{
+                //System.out.println("Same Right");
+            //}
 //            node.right = addImpl(node.right, key);
             if (node.right.priority > node.priority) {
                 return rotateLeft(node);
@@ -87,8 +93,9 @@ public class STMTreap implements IntSet {
     private int randPriority() {
         // The constants in this 64-bit linear congruential random number
         // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-        randState = randState * 2862933555777941757L + 3037000493L;
-        return (int)(randState >> 30);
+        //randState = randState * 2862933555777941757L + 3037000493L;
+        //return (int)(randState >> 30);
+        return 5;
     }
 //    private int randPriority() {
 //        // The constants in this 64-bit linear congruential random number
@@ -121,10 +128,12 @@ public class STMTreap implements IntSet {
         return nR;
     }
 
+    //Does root always need to be updated?
     @Override
     @org.deuce.Atomic
 	public void remove(final int key) {
-        root = removeImpl(root, key);
+        Node temp = removeImpl(root, key);
+        if (temp != root) root = temp;
     }
 
     private Node removeImpl(final Node node, final int key) {
@@ -160,11 +169,25 @@ public class STMTreap implements IntSet {
             }
         }
         else if (key < tempKey) {
-            node.left = removeImpl(node.left, key);
+            Node tempLeft = removeImpl(node.left, key);
+            if (tempLeft != node.left) {
+                node.left = tempLeft;
+            }
+            //}else{
+                //System.out.println("Same Left");
+            //}
+            //node.left = removeImpl(node.left, key);
             return node;
         }
         else {
-            node.right = removeImpl(node.right, key);
+            Node tempRight = removeImpl(node.right, key);
+            if (tempRight != node.right) {
+                node.right = tempRight;
+            }
+            //}else{
+                //System.out.println("Same Right");
+            //}
+            //node.right = removeImpl(node.right, key);
             return node;
         }
     }

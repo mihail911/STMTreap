@@ -22,7 +22,7 @@ public class STMTreap implements IntSet {
         }
     }
 
-    private AtomicLong randState = new AtomicLong();
+    private long randState = 0;
     private Node root;
 
     @Override
@@ -60,33 +60,47 @@ public class STMTreap implements IntSet {
             return node;
         }
         else if (key < tempKey) {
-            node.left = addImpl(node.left, key);
+            Node tempLeft = addImpl(node.left, key);
+            if (tempLeft != node.left){
+                node.left = tempLeft;
+            }else{
+                System.out.println("Same Left");
+            }
+//            node.left = addImpl(node.left, key);
             if (node.left.priority > node.priority) {
                 return rotateRight(node);
+            }else{
+                System.out.print("Same Right");
             }
             return node;
         }
         else {
-            node.right = addImpl(node.right, key);
+            Node tempRight = addImpl(node.right, key);
+            if (tempRight != node.right) node.right = tempRight;
+//            node.right = addImpl(node.right, key);
             if (node.right.priority > node.priority) {
                 return rotateLeft(node);
             }
             return node;
         }
     }
-
     private int randPriority() {
         // The constants in this 64-bit linear congruential random number
         // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-        //randState = randState * 2862933555777941757L + 3037000493L;
-        while(true){
-           long temp = randState.get();
-           boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
-           if (sameValue) {return (int) randState.get()>>30;}
-
-        }
-//        return (int)(randState.get() >> 30);
+        randState = randState * 2862933555777941757L + 3037000493L;
+        return (int)(randState >> 30);
     }
+//    private int randPriority() {
+//        // The constants in this 64-bit linear congruential random number
+//        // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
+//        //randState = randState * 2862933555777941757L + 3037000493L;
+//        while(true){
+//            long temp = randState.get();
+//            boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
+//            if (sameValue) {return (int) randState.get()>>30;}
+//
+//        }
+//    }
 
     private Node rotateRight(final Node node) {
         //       node                  nL

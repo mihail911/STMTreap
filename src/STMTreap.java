@@ -22,7 +22,7 @@ public class STMTreap implements IntSet {
         }
     }
 
-    private long randState = 0;
+    private AtomicLong randState = new AtomicLong();
     private Node root;
 
     @Override
@@ -43,6 +43,7 @@ public class STMTreap implements IntSet {
 	public void add(final int key) {
         root = addImpl(root, key);
     }
+
 
     private Node addImpl(final Node node, final int key) {
         if (node == null) {
@@ -71,8 +72,14 @@ public class STMTreap implements IntSet {
     private int randPriority() {
         // The constants in this 64-bit linear congruential random number
         // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-        randState = randState * 2862933555777941757L + 3037000493L;
-        return (int)(randState >> 30);
+        //randState = randState * 2862933555777941757L + 3037000493L;
+        while(true){
+           long temp = randState.get();
+           boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
+           if (sameValue) {return (int) randState.get()>>30;}
+
+        }
+//        return (int)(randState.get() >> 30);
     }
 
     private Node rotateRight(final Node node) {

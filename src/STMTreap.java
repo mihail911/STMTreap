@@ -29,11 +29,12 @@ public class STMTreap implements IntSet {
     @org.deuce.Atomic
 	public boolean contains(final int key) {
         Node node = root;
+        int tempKey = node.key;
         while (node != null) {
-            if (key == node.key) {
+            if (key == tempKey) {
                 return true;
             }
-            node = key < node.key ? node.left : node.right;
+            node = key < tempKey ? node.left : node.right;
         }
         return false;
     }
@@ -46,14 +47,15 @@ public class STMTreap implements IntSet {
 
 
     private Node addImpl(final Node node, final int key) {
+        int tempKey = node.key;
         if (node == null) {
             return new Node(key, randPriority());
         }
-        else if (key == node.key) {
+        else if (key == tempKey) {
             // no insert needed
             return node;
         }
-        else if (key < node.key) {
+        else if (key < tempKey) {
             node.left = addImpl(node.left, key);
             if (node.left.priority > node.priority) {
                 return rotateRight(node);
@@ -108,11 +110,12 @@ public class STMTreap implements IntSet {
     }
 
     private Node removeImpl(final Node node, final int key) {
+        int tempKey = node.key;
         if (node == null) {
             // not present, nothing to do
             return null;
         }
-        else if (key == node.key) {
+        else if (key == tempKey) {
             if (node.left == null) {
                 // splice out this node
                 return node.right;
@@ -136,7 +139,7 @@ public class STMTreap implements IntSet {
                 }
             }
         }
-        else if (key < node.key) {
+        else if (key < tempKey) {
             node.left = removeImpl(node.left, key);
             return node;
         }

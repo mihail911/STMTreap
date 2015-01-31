@@ -33,6 +33,18 @@ public class CoarseLockTreap implements IntSet {
         return false;
     }
 
+//    private int randPriority() {
+//        // The constants in this 64-bit linear congruential random number
+//        // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
+//        //randState = randState * 2862933555777941757L + 3037000493L;
+//        while(true){
+//            long temp = randState.get();
+//            long tempUpdate = temp * 2862933555777941757L + 3037000493L;
+//            boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
+//            if (sameValue) {return (int) tempUpdate>>30;}
+//
+//        }
+//    }
     @Override
 	public synchronized void add(final int key) {
         root = addImpl(root, key);

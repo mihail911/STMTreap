@@ -1,6 +1,4 @@
-import org.deuce.Atomic;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.*;
 
 public class STMTreap implements IntSet {
     static class Node {
@@ -15,61 +13,47 @@ public class STMTreap implements IntSet {
         }
 
         @Override
-		public String toString() {
+        public String toString() {
             return "Node[key=" + key + ", prio=" + priority +
                     ", left=" + (left == null ? "null" : String.valueOf(left.key)) +
                     ", right=" + (right == null ? "null" : String.valueOf(right.key)) + "]";
         }
     }
 
-    //private long randState = 5;
-    private  AtomicLong randState = new AtomicLong();
+    private AtomicLong randState = new AtomicLong();
     private Node root;
 
     @Override
-    @org.deuce.Atomic
-	public boolean contains(final int key) {
+    public synchronized boolean contains(final int key) {
         Node node = root;
         while (node != null) {
-            int tempKey = node.key;
-            if (key == tempKey) {
+            if (key == node.key) {
                 return true;
             }
-            node = key < tempKey ? node.left : node.right;
+            node = key < node.key ? node.left : node.right;
         }
         return false;
     }
-    //Possible change: Don't change node.left if you don't have to
+
+
     @Override
-    @org.deuce.Atomic
-	public void add(final int key) {
+    public synchronized void add(final int key)
+    {
         Node temp = addImpl(root, key);
         if (temp != root) root = temp;
     }
 
-
     private Node addImpl(final Node node, final int key) {
-        int tempKey;
         if (node == null) {
             return new Node(key, randPriority());
         }
-
-        else{
-            tempKey = node.key;
-        }
-        if(key == tempKey) {
+        else if (key == node.key) {
             // no insert needed
             return node;
         }
-        else if (key < tempKey) {
+        else if (key < node.key) {
             Node tempLeft = addImpl(node.left, key);
-            if (tempLeft != node.left) {
-                node.left = tempLeft;
-            }
-            //}else{
-                //System.out.println("Same Left");
-            //}
-//            node.left = addImpl(node.left, key);
+            if(tempLeft != node.left) node.left = tempLeft;
             if (node.left.priority > node.priority) {
                 return rotateRight(node);
             }
@@ -77,26 +61,14 @@ public class STMTreap implements IntSet {
         }
         else {
             Node tempRight = addImpl(node.right, key);
-            if (tempRight != node.right) {
-                node.right = tempRight;
-            }
-            //}else{
-                //System.out.println("Same Right");
-            //}
-//            node.right = addImpl(node.right, key);
+            if(tempRight != node.right) node.right = tempRight;
             if (node.right.priority > node.priority) {
                 return rotateLeft(node);
             }
             return node;
         }
     }
-    //private int randPriority() {
-        // The constants in this 64-bit linear congruential random number
-        // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-        //randState = randState * 2862933555777941757L + 3037000493L;
-        //return (int)(randState >> 30);
-      //  return 5;
-    //}
+
     private int randPriority() {
         // The constants in this 64-bit linear congruential random number
         // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
@@ -106,7 +78,6 @@ public class STMTreap implements IntSet {
             long tempUpdate = temp * 2862933555777941757L + 3037000493L;
             boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
             if (sameValue) {return (int) tempUpdate>>30;}
-
         }
     }
 
@@ -129,23 +100,18 @@ public class STMTreap implements IntSet {
         return nR;
     }
 
-    //Does root always need to be updated?
     @Override
-    @org.deuce.Atomic
-	public void remove(final int key) {
-        Node temp = removeImpl(root, key);
+    public synchronized void remove(final int key)
+    {   Node temp = removeImpl(root, key);
         if (temp != root) root = temp;
     }
 
     private Node removeImpl(final Node node, final int key) {
-        int tempKey;
         if (node == null) {
             // not present, nothing to do
             return null;
-        }else{
-            tempKey = node.key;
         }
-        if (key == tempKey) {
+        else if (key == node.key) {
             if (node.left == null) {
                 // splice out this node
                 return node.right;
@@ -159,41 +125,26 @@ public class STMTreap implements IntSet {
                 // the removal.
                 if (node.left.priority > node.right.priority) {
                     // node.left needs to end up on top
-
                     final Node top = rotateRight(node);
-                    Node tempTop = removeImpl(top.right, key);
-                    if (tempTop != top.right) top.right = tempTop;
-                    //top.right = removeImpl(top.right, key);
+                    Node topRight = removeImpl(top.right, key);
+                   if (top.right != topRight) top.right = topRight;
                     return top;
                 } else {
                     final Node top = rotateLeft(node);
-                    Node tempTop = removeImpl(top.left, key);
-                    if (tempTop != top.left) top.left = tempTop;
-                    //top.left = removeImpl(top.left, key);
+                    Node topLeft = removeImpl(top.left, key);
+                    if (top.left != topLeft) top.left = topLeft;
                     return top;
                 }
             }
         }
-        else if (key < tempKey) {
-            Node tempLeft = removeImpl(node.left, key);
-            if (tempLeft != node.left) {
-                node.left = tempLeft;
-            }
-            //}else{
-                //System.out.println("Same Left");
-            //}
-            //node.left = removeImpl(node.left, key);
+        else if (key < node.key) {
+            Node tempLeft = removeImpl(node.left,key);
+            if (node.left != tempLeft) node.left = tempLeft;
             return node;
         }
         else {
             Node tempRight = removeImpl(node.right, key);
-            if (tempRight != node.right) {
-                node.right = tempRight;
-            }
-            //}else{
-                //System.out.println("Same Right");
-            //}
-            //node.right = removeImpl(node.right, key);
+            if (node.right != tempRight) node.right = tempRight;
             return node;
         }
     }

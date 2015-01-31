@@ -159,12 +159,17 @@ public class STMTreap implements IntSet {
                 // the removal.
                 if (node.left.priority > node.right.priority) {
                     // node.left needs to end up on top
+
                     final Node top = rotateRight(node);
-                    top.right = removeImpl(top.right, key);
+                    Node tempTop = removeImpl(top.right, key);
+                    if (tempTop != top.right) top.right = tempTop;
+                    //top.right = removeImpl(top.right, key);
                     return top;
                 } else {
                     final Node top = rotateLeft(node);
-                    top.left = removeImpl(top.left, key);
+                    Node tempTop = removeImpl(top.left, key);
+                    if (tempTop != top.left) top.left = tempTop;
+                    //top.left = removeImpl(top.left, key);
                     return top;
                 }
             }

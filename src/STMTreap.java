@@ -24,7 +24,8 @@ public class STMTreap implements IntSet {
     private Node root;
 
     @Override
-    public synchronized boolean contains(final int key) {
+    @org.deuce.Atomic
+    public boolean contains(final int key) {
         Node node = root;
         while (node != null) {
             if (key == node.key) {
@@ -37,7 +38,8 @@ public class STMTreap implements IntSet {
 
 
     @Override
-    public synchronized void add(final int key)
+    @org.deuce.Atomic
+    public void add(final int key)
     {
         Node temp = addImpl(root, key);
         if (temp != root) root = temp;
@@ -72,12 +74,11 @@ public class STMTreap implements IntSet {
     private int randPriority() {
         // The constants in this 64-bit linear congruential random number
         // generator are from http://nuclear.llnl.gov/CNP/rng/rngman/node4.html
-        //randState = randState * 2862933555777941757L + 3037000493L;
         while(true){
             long temp = randState.get();
             long tempUpdate = temp * 2862933555777941757L + 3037000493L;
-            boolean sameValue = randState.compareAndSet(temp, temp * 2862933555777941757L + 3037000493L);
-            if (sameValue) {return (int) tempUpdate>>30;}
+            boolean sameValue = randState.compareAndSet(temp, tempUpdate);
+            if (sameValue) {return (int) (tempUpdate>>30);}
         }
     }
 
@@ -101,7 +102,8 @@ public class STMTreap implements IntSet {
     }
 
     @Override
-    public synchronized void remove(final int key)
+    @org.deuce.Atomic
+    public void remove(final int key)
     {   Node temp = removeImpl(root, key);
         if (temp != root) root = temp;
     }
